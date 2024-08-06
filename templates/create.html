@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe App</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="animated-title">Create a New Recipe</h1>
+        <form action="{{ url_for('create') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="ingredients">Ingredients</label>
+                <textarea class="form-control" id="ingredients" name="ingredients" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="instructions">Instructions</label>
+                <textarea class="form-control" id="instructions" name="instructions" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="user_id">User ID</label>
+                <input type="number" class="form-control" id="user_id" name="user_id" required>
+            </div>
+            <div class="form-group">
+                <label for="image">Image</label>
+                <input type="file" class="form-control-file" id="image" name="image" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Recipe</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to H
