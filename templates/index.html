@@ -4,43 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe App</title>
-    <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+    <style>
+        .recipe-description {
+            max-height: 100px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .recipe-description.expanded {
+            max-height: 1000px;
+        }
+
+        .see-more-toggle {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .see-more-toggle:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-4">
-        <h1 class="animated-title">Recipes</h1>
-        <a href="{{ url_for('create') }}" class="btn btn-primary mb-3">Create a New Recipe</a>
-        <div class="list-group">
+        <h1 class="animated-title">Recipe App</h1>
+
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('index') }}">Home</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        {% if current_user.is_authenticated %}
+                            <li class="nav-item">
+                                <a class="nav-link">Welcome, {{ current_user.username }}!</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('create') }}">Create New Recipe</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="recipe-container mt-4">
             {% for recipe in recipes %}
-                <div class="list-group-item">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <h4 class="mb-1">{{ recipe.title }}</h4>
-                            <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
-                            <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
-                            <p><small>Posted on: {{ recipe.date_posted.strftime('%Y-%m-%d') }}</small></p>
-                            <a href="{{ url_for('update', id=recipe.id) }}" class="btn btn-secondary btn-sm">Edit</a>
-                            <a href="{{ url_for('delete', id=recipe.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Delete</a>
+                <div class="card mb-3">
+                    <img src="{{ url_for('static', filename='uploads/' ~ recipe.image) }}" class="card-img-top" alt="{{ recipe.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recipe.title }}</h5>
+                        <p class="card-text"><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+                        <div class="recipe-description" id="recipe-description-{{ recipe.id }}">
+                            <strong>Instructions:</strong> {{ recipe.instructions }}
                         </div>
-                        <div class="col-md-4">
-                            {% if recipe.image %}
-                                <img src="{{ url_for('static', filename='uploads/' + recipe.image) }}" class="img-fluid" alt="{{ recipe.title }}">
+                        <a href="javascript:void(0)" class="see-more-toggle" onclick="toggleDescription('{{ recipe.id }}')">See More</a>
+                        <p class="card-text"><small class="text-muted">Posted on: {{ recipe.date_posted.strftime('%Y-%m-%d') }}</small></p>
+                        {% if current_user.is_authenticated %}
+                            <div>
+                                {% if current_user.id == recipe.user_id %}
+                                    <a href="{{ url_for('update', id=recipe.id) }}" class="btn btn-primary">Edit</a>
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('delete', id=recipe.id) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this recipe?');">Delete</a>
+                         <br>
+                         <a href="{{ url_for('update', id=recipe.id) }}" class="btn btn-danger" onclick="return confirm('Edit this recipe?');">Edit</a>
                             {% else %}
-                                <img src="{{ url_for('static', filename='uploads/default.jpg') }}" class="img-fluid" alt="Default Image">
-                            {% endif %}
-                        </div>
+                            <p>Please log in to edit or delete recipes.</p>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
         </div>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script>
+        function toggleDescription(recipeId) {
+            var allDescriptions = document.querySelectorAll('.recipe-description');
+            var currentDesc = document.getElementById('recipe-description-' + recipeId);
+            var link = currentDesc.nextElementSibling;
+
+            allDescriptions.forEach(desc => {
+                if (desc !== currentDesc) {
+                    desc.classList.remove('expanded');
+                    desc.nextElementSibling.textContent = 'See More';
+                }
+            });
+
+            if (currentDesc.classList.contains('expanded')) {
+                currentDesc.classList.remove('expanded');
+                link.textContent = 'See More';
+            } else {
+                currentDesc.classList.add('expanded');
+                link.textContent = 'See Less';
+            }
+        }
+    </script>
+
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
